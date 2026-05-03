@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "5vY9W5ECuXDraPmNSJFH3"
+uri = "file://artifacts/safad-vibe-mobile/assets/images/icon.png"
+type = "image"
+title = "safad vibe app icon"

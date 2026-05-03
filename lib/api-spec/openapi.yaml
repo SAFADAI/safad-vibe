@@ -1,0 +1,1103 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Safad Vibe API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: products
+    description: Product image search operations
+  - name: flights
+    description: Flight search operations
+  - name: hotels
+    description: Hotel search operations
+  - name: search
+    description: Unified search history and suggestions
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /products/search:
+    post:
+      operationId: searchProducts
+      tags: [products]
+      summary: Search products by image or text query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductSearchRequest"
+      responses:
+        "200":
+          description: Product search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductSearchResponse"
+
+  /products/analyze-image:
+    post:
+      operationId: analyzeProductImage
+      tags: [products]
+      summary: Analyze uploaded image to extract product attributes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImageAnalysisRequest"
+      responses:
+        "200":
+          description: Image analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageAnalysisResult"
+
+  /products/trending:
+    get:
+      operationId: getTrendingProducts
+      tags: [products]
+      summary: Get trending products across platforms
+      parameters:
+        - name: region
+          in: query
+          schema:
+            type: string
+            enum: [EU, US, ARAB, ASIA, GLOBAL]
+            default: GLOBAL
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trending products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductSearchResponse"
+
+  /products/price-alerts:
+    get:
+      operationId: getPriceAlerts
+      tags: [products]
+      summary: List all price alerts
+      responses:
+        "200":
+          description: List of price alerts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceAlertsResponse"
+    post:
+      operationId: createPriceAlert
+      tags: [products]
+      summary: Create a new price alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePriceAlertRequest"
+      responses:
+        "201":
+          description: Price alert created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceAlertItem"
+
+  /products/price-alerts/{id}:
+    delete:
+      operationId: deletePriceAlert
+      tags: [products]
+      summary: Delete a price alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Alert deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+
+  /products/price-history:
+    get:
+      operationId: getProductPriceHistory
+      tags: [products]
+      summary: Get price history for a product query over time
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: platform
+          in: query
+          schema:
+            type: string
+            enum: [amazon, ebay, aliexpress]
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Price history data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceHistoryResponse"
+
+  /products/local-platforms:
+    get:
+      operationId: getLocalPlatforms
+      tags: [products]
+      summary: Get local shopping platforms by region or country language code
+      parameters:
+        - name: region
+          in: query
+          schema:
+            type: string
+            enum: [EU, US, ARAB, ASIA, GLOBAL]
+            default: GLOBAL
+        - name: lang
+          in: query
+          schema:
+            type: string
+            description: "Language/country code (e.g. ar, tr, ru, ja, ko)"
+      responses:
+        "200":
+          description: Local platforms list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalPlatformsResponse"
+
+  /flights/search:
+    post:
+      operationId: searchFlights
+      tags: [flights]
+      summary: Search for flights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlightSearchRequest"
+      responses:
+        "200":
+          description: Flight search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlightSearchResponse"
+
+  /flights/price-calendar:
+    get:
+      operationId: getFlightPriceCalendar
+      tags: [flights]
+      summary: Get price calendar for a route
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            description: "Format: YYYY-MM"
+        - name: tripType
+          in: query
+          schema:
+            type: string
+            enum: [one-way, round-trip]
+            default: one-way
+      responses:
+        "200":
+          description: Price calendar data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceCalendar"
+
+  /flights/popular-routes:
+    get:
+      operationId: getPopularRoutes
+      tags: [flights]
+      summary: Get popular flight routes
+      parameters:
+        - name: region
+          in: query
+          schema:
+            type: string
+            enum: [EU, US, ARAB, ASIA, GLOBAL]
+            default: GLOBAL
+      responses:
+        "200":
+          description: Popular routes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PopularRoutesResponse"
+
+  /hotels/search:
+    post:
+      operationId: searchHotels
+      tags: [hotels]
+      summary: Search for hotels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HotelSearchRequest"
+      responses:
+        "200":
+          description: Hotel search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HotelSearchResponse"
+
+  /hotels/popular-destinations:
+    get:
+      operationId: getPopularDestinations
+      tags: [hotels]
+      summary: Get popular hotel destinations
+      parameters:
+        - name: region
+          in: query
+          schema:
+            type: string
+            enum: [EU, US, ARAB, ASIA, GLOBAL]
+            default: GLOBAL
+      responses:
+        "200":
+          description: Popular destinations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PopularDestinationsResponse"
+
+  /hotels/deal-summary:
+    get:
+      operationId: getHotelDealSummary
+      tags: [hotels]
+      summary: Get summary of current best hotel deals by region
+      responses:
+        "200":
+          description: Deal summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealSummary"
+
+  /search/history:
+    get:
+      operationId: getSearchHistory
+      tags: [search]
+      summary: Get recent search history
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [products, flights, hotels, all]
+            default: all
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Search history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchHistoryResponse"
+
+  /search/stats:
+    get:
+      operationId: getSearchStats
+      tags: [search]
+      summary: Get aggregated search statistics and top searches
+      responses:
+        "200":
+          description: Search statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ProductSearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Text query for product search
+        imageBase64:
+          type: string
+          description: Base64 encoded image for visual search
+        platforms:
+          type: array
+          items:
+            type: string
+            enum: [amazon, ebay, aliexpress]
+          default: [amazon, ebay, aliexpress]
+        region:
+          type: string
+          enum: [EU, US, ARAB, ASIA, GLOBAL]
+          default: GLOBAL
+        sortBy:
+          type: string
+          enum: [relevance, price_asc, price_desc, delivery_time]
+          default: relevance
+        maxPrice:
+          type: number
+        minPrice:
+          type: number
+      required:
+        - query
+
+    ProductSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResult"
+        totalCount:
+          type: integer
+        query:
+          type: string
+        platforms:
+          type: array
+          items:
+            type: string
+      required:
+        - results
+        - totalCount
+        - query
+        - platforms
+
+    ProductResult:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        platform:
+          type: string
+          enum: [amazon, ebay, aliexpress]
+        imageUrl:
+          type: string
+        affiliateUrl:
+          type: string
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        shippingInfo:
+          type: string
+        availableRegions:
+          type: array
+          items:
+            type: string
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - price
+        - currency
+        - platform
+        - affiliateUrl
+
+    ImageAnalysisRequest:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64 encoded image
+        imageUrl:
+          type: string
+          description: URL of image to analyze
+      required: []
+
+    ImageAnalysisResult:
+      type: object
+      properties:
+        productType:
+          type: string
+        brand:
+          type: string
+        attributes:
+          type: array
+          items:
+            type: string
+        suggestedQuery:
+          type: string
+        confidence:
+          type: number
+      required:
+        - suggestedQuery
+        - confidence
+
+    FlightSearchRequest:
+      type: object
+      properties:
+        tripType:
+          type: string
+          enum: [one-way, round-trip, multi-city]
+          default: one-way
+        origin:
+          type: string
+          description: IATA airport code
+        destination:
+          type: string
+          description: IATA airport code
+        departureDate:
+          type: string
+          format: date
+        returnDate:
+          type: string
+          format: date
+        adults:
+          type: integer
+          default: 1
+        children:
+          type: integer
+          default: 0
+        cabinClass:
+          type: string
+          enum: [economy, premium_economy, business, first]
+          default: economy
+        maxStops:
+          type: integer
+        maxPrice:
+          type: number
+        preferredAirlines:
+          type: array
+          items:
+            type: string
+        includeBaggage:
+          type: boolean
+        region:
+          type: string
+          enum: [EU, US, ARAB, ASIA, GLOBAL]
+      required:
+        - origin
+        - destination
+        - departureDate
+
+    FlightSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlightResult"
+        totalCount:
+          type: integer
+        searchId:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        filters:
+          $ref: "#/components/schemas/FlightFilters"
+      required:
+        - results
+        - totalCount
+        - origin
+        - destination
+
+    FlightResult:
+      type: object
+      properties:
+        id:
+          type: string
+        airline:
+          type: string
+        airlineCode:
+          type: string
+        flightNumber:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        departureTime:
+          type: string
+          format: date-time
+        arrivalTime:
+          type: string
+          format: date-time
+        duration:
+          type: string
+        stops:
+          type: integer
+        price:
+          type: number
+        currency:
+          type: string
+        cabinClass:
+          type: string
+        baggageIncluded:
+          type: boolean
+        affiliateUrl:
+          type: string
+        provider:
+          type: string
+          enum: [amadeus, skyscanner, kiwi]
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - id
+        - airline
+        - origin
+        - destination
+        - departureTime
+        - arrivalTime
+        - duration
+        - stops
+        - price
+        - currency
+        - affiliateUrl
+        - provider
+
+    FlightFilters:
+      type: object
+      properties:
+        airlines:
+          type: array
+          items:
+            type: string
+        minPrice:
+          type: number
+        maxPrice:
+          type: number
+        maxStops:
+          type: integer
+        cabinClasses:
+          type: array
+          items:
+            type: string
+
+    PriceCalendar:
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        month:
+          type: string
+        prices:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              price:
+                type: number
+              currency:
+                type: string
+              available:
+                type: boolean
+            required:
+              - date
+              - price
+              - currency
+              - available
+      required:
+        - origin
+        - destination
+        - month
+        - prices
+
+    PopularRoutesResponse:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              origin:
+                type: string
+              originCity:
+                type: string
+              destination:
+                type: string
+              destinationCity:
+                type: string
+              lowestPrice:
+                type: number
+              currency:
+                type: string
+              imageUrl:
+                type: string
+            required:
+              - origin
+              - destination
+              - lowestPrice
+              - currency
+      required:
+        - routes
+
+    HotelSearchRequest:
+      type: object
+      properties:
+        destination:
+          type: string
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        adults:
+          type: integer
+          default: 2
+        rooms:
+          type: integer
+          default: 1
+        minRating:
+          type: number
+        maxPrice:
+          type: number
+        amenities:
+          type: array
+          items:
+            type: string
+        providers:
+          type: array
+          items:
+            type: string
+            enum: [booking, expedia, agoda]
+          default: [booking, expedia, agoda]
+        sortBy:
+          type: string
+          enum: [price, rating, distance]
+          default: price
+      required:
+        - destination
+        - checkIn
+        - checkOut
+
+    HotelSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/HotelResult"
+        totalCount:
+          type: integer
+        destination:
+          type: string
+        checkIn:
+          type: string
+        checkOut:
+          type: string
+      required:
+        - results
+        - totalCount
+        - destination
+        - checkIn
+        - checkOut
+
+    HotelResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        rating:
+          type: number
+        reviewScore:
+          type: number
+        reviewCount:
+          type: integer
+        pricePerNight:
+          type: number
+        currency:
+          type: string
+        imageUrl:
+          type: string
+        amenities:
+          type: array
+          items:
+            type: string
+        address:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        provider:
+          type: string
+          enum: [booking, expedia, agoda]
+        affiliateUrl:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - rating
+        - pricePerNight
+        - currency
+        - provider
+        - affiliateUrl
+
+    PopularDestinationsResponse:
+      type: object
+      properties:
+        destinations:
+          type: array
+          items:
+            type: object
+            properties:
+              city:
+                type: string
+              country:
+                type: string
+              imageUrl:
+                type: string
+              avgPricePerNight:
+                type: number
+              currency:
+                type: string
+              rating:
+                type: number
+            required:
+              - city
+              - country
+              - avgPricePerNight
+              - currency
+      required:
+        - destinations
+
+    DealSummary:
+      type: object
+      properties:
+        regions:
+          type: array
+          items:
+            type: object
+            properties:
+              region:
+                type: string
+              topDeal:
+                $ref: "#/components/schemas/HotelResult"
+              avgDiscount:
+                type: number
+            required:
+              - region
+              - avgDiscount
+        lastUpdated:
+          type: string
+          format: date-time
+      required:
+        - regions
+        - lastUpdated
+
+    SearchHistoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [products, flights, hotels]
+        query:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        resultCount:
+          type: integer
+      required:
+        - id
+        - type
+        - query
+        - createdAt
+
+    SearchHistoryResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchHistoryItem"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    PriceAlertItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productTitle:
+          type: string
+        targetPrice:
+          type: number
+        currentPrice:
+          type: number
+        currency:
+          type: string
+        platform:
+          type: string
+        isTriggered:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - productTitle
+        - targetPrice
+        - currentPrice
+        - currency
+        - isTriggered
+        - createdAt
+
+    CreatePriceAlertRequest:
+      type: object
+      properties:
+        productTitle:
+          type: string
+        targetPrice:
+          type: number
+        currentPrice:
+          type: number
+        currency:
+          type: string
+        platform:
+          type: string
+      required:
+        - productTitle
+        - targetPrice
+        - currentPrice
+
+    PriceAlertsResponse:
+      type: object
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/PriceAlertItem"
+        total:
+          type: integer
+        triggeredCount:
+          type: integer
+      required:
+        - alerts
+        - total
+        - triggeredCount
+
+    PriceHistoryPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        price:
+          type: number
+        platform:
+          type: string
+        currency:
+          type: string
+      required:
+        - date
+        - price
+        - platform
+        - currency
+
+    PriceHistoryResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: "#/components/schemas/PriceHistoryPoint"
+        lowestPrice:
+          type: number
+        highestPrice:
+          type: number
+        currentPrice:
+          type: number
+        currency:
+          type: string
+      required:
+        - query
+        - points
+        - lowestPrice
+        - highestPrice
+        - currentPrice
+        - currency
+
+    LocalPlatform:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        country:
+          type: string
+        region:
+          type: string
+        color:
+          type: string
+        flag:
+          type: string
+        searchUrlTemplate:
+          type: string
+        logoText:
+          type: string
+        category:
+          type: string
+      required:
+        - id
+        - name
+        - country
+        - region
+        - color
+        - flag
+        - searchUrlTemplate
+
+    LocalPlatformsResponse:
+      type: object
+      properties:
+        platforms:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocalPlatform"
+        region:
+          type: string
+        country:
+          type: string
+      required:
+        - platforms
+        - region
+
+    SearchStats:
+      type: object
+      properties:
+        totalSearches:
+          type: integer
+        productSearches:
+          type: integer
+        flightSearches:
+          type: integer
+        hotelSearches:
+          type: integer
+        topProductQueries:
+          type: array
+          items:
+            type: object
+            properties:
+              query:
+                type: string
+              count:
+                type: integer
+            required:
+              - query
+              - count
+        topFlightRoutes:
+          type: array
+          items:
+            type: object
+            properties:
+              route:
+                type: string
+              count:
+                type: integer
+            required:
+              - route
+              - count
+        topHotelDestinations:
+          type: array
+          items:
+            type: object
+            properties:
+              destination:
+                type: string
+              count:
+                type: integer
+            required:
+              - destination
+              - count
+      required:
+        - totalSearches
+        - productSearches
+        - flightSearches
+        - hotelSearches

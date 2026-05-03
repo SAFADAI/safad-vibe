@@ -1,0 +1,115 @@
+Build a fully legal, scalable, AI-powered multi-service web application that integrates only with official APIs and authorized data providers.
+
+Strict Rule:
+
+* Do NOT use scraping or unauthorized data extraction.
+* Only use official APIs, affiliate programs, and licensed data sources.
+
+## 1. Product Image Search (Legal Version)
+
+* User uploads an image
+* Use AI Vision to detect:
+
+  * product type
+  * brand
+  * attributes
+* Convert image → structured search query
+* Fetch results ONLY from:
+
+  * Amazon Product Advertising API
+  * eBay API
+  * AliExpress Portals API
+  * Other official affiliate APIs
+
+Features:
+
+* Price comparison
+* Shipping availability filter
+* Region targeting (EU / Arab / US / Asia)
+* Source toggling (user selects platforms)
+* Ranking by relevance + price + delivery time
+
+## 2. Flight Comparison (Legal APIs Only)
+
+Integrations:
+
+* Amadeus API (primary)
+* Skyscanner Affiliate API
+* Kiwi Tequila API
+
+Features:
+
+* One-way / Round-trip / Multi-city
+* Full filtering (price, stops, airlines, baggage)
+* Region-based search scope
+* Price calendar
+* Deep links via affiliate tracking
+
+## 3. Hotel Search (Authorized Providers)
+
+Integrations:
+
+* Booking.com Affiliate Partner API
+* Expedia Rapid API
+* Agoda Affiliate API
+
+Features:
+
+* Map-based search
+* Price comparison
+* Filters (price, rating, amenities)
+* Affiliate redirection for booking
+
+## 4. Monetization (Clean Model)
+
+* Affiliate commissions (primary)
+* Optional premium subscription:
+
+  * price alerts
+  * advanced filters
+  * early deals
+
+## 5. Compliance & Legal
+
+* GDPR compliance (EU critical)
+* Cookie consent management
+* Terms of service + privacy policy
+* API usage compliance (rate limits, branding rules)
+* No storing restricted partner data beyond allowed limits
+
+## 6. UX/UI
+
+* Modern colorful gradients (multi-tone, not flat)
+* Interactive animations (Framer Motion)
+* Progressive loading (API-based results)
+* Clear source labeling (transparency for users)
+
+## 7. Trust Layer (Important)
+
+* Show data source (e.g. “via Booking”)
+* Show last update timestamp
+* Avoid misleading “best price” claims
+
+## 8. Architecture
+
+* API Gateway layer
+* Microservices per domain:
+
+  * product-service
+  * flight-service
+  * hotel-service
+* Caching:
+
+  * Redis for API responses
+* Queue system:
+
+  * background enrichment (optional)
+
+## 9. Future Legal Extensions
+
+* Add more APIs (not scraping)
+* Partner with regional marketplaces
+* Build your own vendor onboarding system
+
+Goal:
+A legally compliant, high-performance aggregator that builds trust and scales globally without risk.
